@@ -6,9 +6,14 @@ import TCDDTicketFinder.TicketFinder.DTO.TicketRequestBodyDTO;
 import TCDDTicketFinder.TicketFinder.DTO.TicketRequestDTO;
 import TCDDTicketFinder.TicketFinder.DTO.TicketResponseDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -22,6 +27,7 @@ public class TicketService {
 
     public TicketResponseDTO getRequest(TicketRequestBodyDTO ticketRequestBody){
         TicketRequestDTO ticketRequest = new TicketRequestDTO();
+
 
         ticketRequest.setSearchRoutes(List.of(new TicketRequestDTO.SearchRoutes(
                 ticketRequestBody.getDepartureStationId(),
@@ -74,5 +80,24 @@ public class TicketService {
         );
 
         return availableTickets;
+    }
+
+    public List<TicketDTO> getAvailableTickets(TicketRequestBodyDTO requestBody) {
+        TicketResponseDTO response = getRequest(requestBody);
+        return getFilteredTrain(response, requestBody);
+    }
+
+    public Page<TicketDTO> getPaginatedTickets(TicketRequestBodyDTO requestBody, Pageable pageable) {
+        List<TicketDTO> allTickets = getAvailableTickets(requestBody);
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), allTickets.size());
+
+        List<TicketDTO> pagedList = new ArrayList<>();
+        if (start < allTickets.size()) {
+            pagedList = allTickets.subList(start, end);
+        }
+
+        return new PageImpl<>(pagedList, pageable, allTickets.size());
     }
 }

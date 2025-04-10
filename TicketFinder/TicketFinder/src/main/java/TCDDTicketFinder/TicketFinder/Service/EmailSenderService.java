@@ -7,6 +7,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -37,7 +38,7 @@ public class EmailSenderService {
                             .append("Name: ").append(ticket.getName()).append("\n")
                             .append("Cabin: ").append(ticket.getCabinName()).append("\n")
                             .append("Availability: ").append(ticket.getAvailabilityCount()).append("\n")
-                            .append("Departure Time: ").append(ticket.getDepartureTime().format(formatter)).append("\n\n");
+                            .append("Departure Time: ").append(ticket.getDepartureTime().plusHours(3).atZone(ZoneId.of("Europe/Istanbul")).format(formatter)).append("\n\n");
                 });
 
         if (emailContent.length() > "Available Tickets:\n\n".length()) {
